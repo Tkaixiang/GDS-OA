@@ -12,7 +12,7 @@ jsonData = {}
 with open('restaurant_data.json', encoding='utf-8') as f:
     jsonData = json.load(f)
 
-# TASK 1: Extract the following fields and store the data as restaurants.csv
+
 restaurantCSVData = {
     "Restaurant Id": [],
     "Restaurant Name": [],
@@ -22,11 +22,30 @@ restaurantCSVData = {
     "User Aggregate Rating": [],
     "Cuisines": []
 }
+restaurantEventsCSVData = {
+    "Event Id": [],
+    "Restaurant Id": [],
+    "Restaurant Name": [],
+    "Photo URL": [],
+    "Event Title": [],
+    "Event Start Date": [],
+    "Event End Date": []
+}
+
+ratingThresholds =  {
+    "Excellent": {'max': 0, 'min': 999},
+    "Very Good": {'max': 0, 'min': 999},
+    "Good": {'max': 0, 'min': 999},
+    "Average": {'max': 0, 'min': 999},
+    "Poor": {'max': 0, 'min': 999}
+}
+
 for data in jsonData:
     mainRestaurantData = data['restaurants']
 
 
     for x in mainRestaurantData:
+        # TASK 1: Extract the following fields and store the data as restaurants.csv
         currentResObj = x["restaurant"]
         restaurantCSVData["Restaurant Id"].append(currentResObj["R"]["res_id"]) # Resurant ID
         restaurantCSVData["Restaurant Name"].append(currentResObj['name']) # Name
@@ -41,5 +60,34 @@ for data in jsonData:
         restaurantCSVData["User Aggregate Rating"].append(float(currentResObj["user_rating"]["aggregate_rating"]))
         restaurantCSVData["Cuisines"].append(currentResObj["cuisines"])
 
-resCSVPD = pd.DataFrame.from_dict(restaurantCSVData)
-resCSVPD.to_csv('restaurants.csv', index=False)
+        # TASK 2: Extract the list of restaurants that have past event in the month of April 2019 and store the data as restaurant_events.csv
+        if ("zomato_events" in currentResObj):
+
+            currentEvents = currentResObj["zomato_events"]
+            for event in currentEvents:
+                mainEventObj = event["event"]
+
+                startDate = mainEventObj["start_date"]
+                endDate = mainEventObj["end_date"]
+
+                # Only if in the month of April 2019
+                if (startDate[:7] == "2019-04" or endDate[:7] == "2019-04"):
+                    restaurantEventsCSVData["Event Id"].append(mainEventObj["event_id"])
+                    restaurantEventsCSVData["Restaurant Id"].append(currentResObj["R"]["res_id"])
+                    restaurantEventsCSVData["Restaurant Name"].append(currentResObj['name'])
+
+                    photoList = mainEventObj["photos"]
+                    if (len(photoList) > 0):
+                        restaurantEventsCSVData["Photo URL"].append(photoList[0]["photo"]["url"])
+                    else:
+                        restaurantEventsCSVData["Photo URL"].append("NA")
+                    
+                    restaurantEventsCSVData["Event Title"].append(mainEventObj["title"])
+                    restaurantEventsCSVData["Event Start Date"].append(startDate)
+                    restaurantEventsCSVData["Event End Date"].append(endDate)
+        
+        # TASK 3: From the dataset (restaurant_data.json), determine the threshold for the different rating text based on aggregate rating. Return aggregates for the following ratings only:
+        
+
+pd.DataFrame.from_dict(restaurantCSVData).to_csv('restaurants.csv', index=False)
+pd.DataFrame.from_dict(restaurantEventsCSVData).to_csv('restaurants_events.csv', index=False)
