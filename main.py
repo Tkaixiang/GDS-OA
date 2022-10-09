@@ -39,6 +39,7 @@ ratingThresholds =  {
     "Average": {'max': 0, 'min': 999},
     "Poor": {'max': 0, 'min': 999}
 }
+wantedRatingText = {"Excellent": 0, "Very Good": 0, "Good": 0, "Average": 0, "Poor": 0}
 
 for data in jsonData:
     mainRestaurantData = data['restaurants']
@@ -57,7 +58,8 @@ for data in jsonData:
         else:  restaurantCSVData["Country"].append("Unknown Country Code")
         restaurantCSVData["City"].append(currentResObj["location"]["city"])
         restaurantCSVData["User Rating Votes"].append(currentResObj["user_rating"]["votes"])
-        restaurantCSVData["User Aggregate Rating"].append(float(currentResObj["user_rating"]["aggregate_rating"]))
+        aggreateRatingFloat = float(currentResObj["user_rating"]["aggregate_rating"])
+        restaurantCSVData["User Aggregate Rating"].append(aggreateRatingFloat)
         restaurantCSVData["Cuisines"].append(currentResObj["cuisines"])
 
         # TASK 2: Extract the list of restaurants that have past event in the month of April 2019 and store the data as restaurant_events.csv
@@ -87,7 +89,19 @@ for data in jsonData:
                     restaurantEventsCSVData["Event End Date"].append(endDate)
         
         # TASK 3: From the dataset (restaurant_data.json), determine the threshold for the different rating text based on aggregate rating. Return aggregates for the following ratings only:
-        
+        ratingText = currentResObj["user_rating"]["rating_text"]
+        if (ratingText in wantedRatingText):
+            if (aggreateRatingFloat > ratingThresholds[ratingText]["max"]):
+                ratingThresholds[ratingText]["max"] = aggreateRatingFloat
+            if (aggreateRatingFloat < ratingThresholds[ratingText]["min"]):
+                ratingThresholds[ratingText]["min"] = aggreateRatingFloat
 
 pd.DataFrame.from_dict(restaurantCSVData).to_csv('restaurants.csv', index=False)
-pd.DataFrame.from_dict(restaurantEventsCSVData).to_csv('restaurants_events.csv', index=False)
+print("Wrote restaurants.csv successfully")
+pd.DataFrame.from_dict(restaurantEventsCSVData).to_csv('restaurant_events.csv', index=False)
+print("Wrote restaurant_events.csv successfully")
+
+# Print rating thresholds
+print("=====Rating Thresholds=====")
+for x in ratingThresholds:
+    print('"' + x + '": Rating of ' + str(ratingThresholds[x]['max']) + ' to ' + str(ratingThresholds[x]['min']))
