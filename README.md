@@ -24,6 +24,16 @@ py main.py
 
 It will output the **Rating Thresholds for Task 3 in stdout** and create 2 files: `restaurant_events.csv` and `restaurants.csv` in the **same folder**.
 
+### Running Unit Tests
+
+Run the following for some basic unit tests to check the 2 output CSVs for the correct columns and if the first data is correct
+
+```
+py unit_tests.py
+```
+
+
+
 ## Deploying Solution on Cloud Services
 
 One possible way to run this script is to upload the data files to an `AWS S3` and then run it with `AWS Lambda` 
